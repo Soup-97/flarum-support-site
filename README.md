@@ -3,5 +3,6 @@
 Landing page for Support for Flarum, a knowledge base and ticket system for
 Flarum 2.x. Served by GitHub Pages from the `main` branch.
 
-To set the price and checkout link, edit `window.SITE` at the top of
+To set the prices and checkout links (monthly and yearly), edit
+`window.SITE.PLANS` at the top of
 `index.html`.

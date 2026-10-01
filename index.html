@@ -11,13 +11,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   // ---------------------------------------------------------------
-  // Edit these two values when the Polar product is set up.
-  // While CHECKOUT_URL is empty, the buy buttons say "Coming soon".
+  // Fill in each plan when its Polar product is set up: the price as
+  // shown on the page and the product's checkout link. A plan without a
+  // checkout link is hidden; with none set, the page says "Coming soon".
   // ---------------------------------------------------------------
   window.SITE = {
-    CHECKOUT_URL: '',          // e.g. https://buy.polar.sh/polar_cl_...
-    PRICE: '',                 // e.g. '€49 / year'
-    PRICE_NOTE: 'Includes updates and support while your license is active.',
+    PLANS: {
+      yearly:  { PRICE: '', PER: '/ year',  CHECKOUT_URL: '', NOTE: 'Billed yearly. Cancel any time.' },
+      monthly: { PRICE: '', PER: '/ month', CHECKOUT_URL: '', NOTE: 'Billed monthly. Cancel any time.' },
+    },
+    DEFAULT_PLAN: 'yearly',
   };
 </script>
 <style>
@@ -173,7 +176,12 @@
 
   .pricing { max-width: 520px; margin: 0 auto; text-align: center; background: var(--surface); border: 2px solid var(--accent); border-radius: 18px; padding: 36px 28px; box-shadow: var(--shadow); }
   .price { font-size: 2.5rem; font-weight: 800; letter-spacing: -.02em; margin: 6px 0; }
+  .price-per { font-size: 1rem; font-weight: 500; color: var(--muted); letter-spacing: 0; }
   .price-note { color: var(--muted); margin: 0 0 22px; }
+  .billing { display: inline-flex; gap: 4px; padding: 4px; margin: 18px 0 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; }
+  .billing[hidden] { display: none; }
+  .billing button { font: inherit; font-size: .875rem; font-weight: 600; padding: 6px 16px; border: 0; border-radius: 7px; background: none; color: var(--muted); cursor: pointer; }
+  .billing button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
   .pricing ul.checks { text-align: left; margin: 0 0 26px; }
   .pricing .btn { width: 100%; }
 
@@ -299,15 +307,19 @@
     <div class="wrap">
       <div class="pricing">
         <span class="eyebrow">License</span>
+        <div><div class="billing" id="billing" role="group" aria-label="Billing period" hidden>
+          <button type="button" data-plan="monthly" aria-pressed="false">Monthly</button>
+          <button type="button" data-plan="yearly" aria-pressed="false">Yearly</button>
+        </div></div>
         <div class="price" id="price">Coming soon</div>
         <p class="price-note" id="price-note"></p>
         <ul class="checks">
           <li>Use on your own Flarum forum</li>
           <li>Full source code, which you may modify for your forum</li>
-          <li>Updates and new Flarum compatibility while your license is active</li>
+          <li>Updates and new Flarum compatibility while your subscription is active</li>
           <li>Support from the developer</li>
         </ul>
-        <a class="btn btn-primary js-buy" href="#pricing">Buy now</a>
+        <a class="btn btn-primary" id="buy-now" href="#pricing">Buy now</a>
       </div>
     </div>
   </section>
@@ -358,7 +370,7 @@ php flarum cache:clear</pre>
         <p>Yes. Access to the code and updates goes through GitHub, so you need a (free) GitHub account to buy and install.</p>
       </details>
       <details>
-        <summary>What happens when my license ends?</summary>
+        <summary>What happens when my subscription ends?</summary>
         <p>You can keep using the last version you received. You won't get new versions or support until you renew.</p>
       </details>
       <details>
@@ -383,20 +395,43 @@ php flarum cache:clear</pre>
 <script>
   (function () {
     var s = window.SITE || {};
-    var hasCheckout = !!s.CHECKOUT_URL;
+    var plans = s.PLANS || {};
+    var available = ['monthly', 'yearly'].filter(function (k) { return plans[k] && plans[k].CHECKOUT_URL; });
+    var priceEl = document.getElementById('price');
+    var noteEl = document.getElementById('price-note');
+    var buyEl = document.getElementById('buy-now');
+    var billing = document.getElementById('billing');
 
-    document.getElementById('price').textContent = s.PRICE || 'Coming soon';
-    document.getElementById('price-note').textContent = s.PRICE ? s.PRICE_NOTE : 'Sales open shortly.';
-
-    document.querySelectorAll('.js-buy').forEach(function (el) {
-      if (hasCheckout) {
-        el.href = s.CHECKOUT_URL;
-      } else if (el.closest('.pricing')) {
-        el.textContent = 'Coming soon';
-        el.setAttribute('aria-disabled', 'true');
-        el.removeAttribute('href');
+    function show(key) {
+      var plan = plans[key];
+      priceEl.textContent = plan.PRICE;
+      if (plan.PER) {
+        var per = document.createElement('span');
+        per.className = 'price-per';
+        per.textContent = ' ' + plan.PER;
+        priceEl.appendChild(per);
       }
-    });
+      noteEl.textContent = plan.NOTE || '';
+      buyEl.href = plan.CHECKOUT_URL;
+      billing.querySelectorAll('button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-plan') === key));
+      });
+    }
+
+    if (available.length === 0) {
+      noteEl.textContent = 'Sales open shortly.';
+      buyEl.textContent = 'Coming soon';
+      buyEl.setAttribute('aria-disabled', 'true');
+      buyEl.removeAttribute('href');
+    } else {
+      billing.querySelectorAll('button').forEach(function (b) {
+        var key = b.getAttribute('data-plan');
+        if (available.indexOf(key) === -1) b.remove();
+        else b.addEventListener('click', function () { show(key); });
+      });
+      billing.hidden = available.length < 2;
+      show(available.indexOf(s.DEFAULT_PLAN) !== -1 ? s.DEFAULT_PLAN : available[0]);
+    }
 
     var root = document.documentElement;
     try {
