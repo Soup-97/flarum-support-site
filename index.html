@@ -6,9 +6,6 @@
 <title>Support for Flarum</title>
 <meta name="description" content="A knowledge base and ticket system for Flarum 2.x forums, with tickets for visitors without an account.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fbbf24'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2309090b' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='none' stroke='%2309090b' stroke-width='2'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
   // ---------------------------------------------------------------
   // Fill in each plan when its Polar product is set up: the price as
@@ -77,10 +74,10 @@
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font: 16px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
   a { color: var(--link); }
-  code, pre { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .875rem; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 
   header.top { border-bottom: 1px solid var(--border); }
@@ -195,6 +192,7 @@
 
   footer { padding: 36px 0 48px; color: var(--muted); font-size: .875rem; border-top: 1px solid var(--border); }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .footer-links { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .theme-toggle { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: .8125rem; }
 </style>
 </head>
@@ -387,8 +385,8 @@ php flarum cache:clear</pre>
 
 <footer>
   <div class="wrap">
-    <span>Support for Flarum by <a href="https://github.com/Soup-97">Soup-97</a>. Not affiliated with the Flarum Foundation.</span>
-    <button class="theme-toggle" id="theme-toggle" type="button">Toggle theme</button>
+    <span>Support for Flarum by <a href="https://utherstudios.com">Utherstudios</a> · <a href="mailto:contact@pixmmo.com">contact@pixmmo.com</a><br>Not affiliated with the Flarum Foundation.</span>
+    <span class="footer-links"><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> <button class="theme-toggle" id="theme-toggle" type="button">Toggle theme</button></span>
   </div>
 </footer>
 
