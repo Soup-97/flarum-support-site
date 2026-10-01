@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support for Flarum</title>
+<meta name="description" content="A knowledge base and ticket system for Flarum 2.x forums, with tickets for visitors without an account.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fbbf24'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2309090b' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='none' stroke='%2309090b' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  // ---------------------------------------------------------------
+  // Edit these two values when the Polar product is set up.
+  // While CHECKOUT_URL is empty, the buy buttons say "Coming soon".
+  // ---------------------------------------------------------------
+  window.SITE = {
+    CHECKOUT_URL: '',          // e.g. https://buy.polar.sh/polar_cl_...
+    PRICE: '',                 // e.g. '€49 / year'
+    PRICE_NOTE: 'Includes updates and support while your license is active.',
+  };
+</script>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --surface-2: #f4f4f5;
+    --text: #18181b;
+    --muted: #52525b;
+    --border: #e4e4e7;
+    --accent: #fbbf24;
+    --accent-ink: #09090b;
+    --accent-soft: #fef3c7;
+    --link: #b45309;
+    --ok: #15803d;
+    --warn: #b45309;
+    --info: #1d4ed8;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #09090b;
+      --surface: #131316;
+      --surface-2: #1c1c21;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --border: #27272a;
+      --accent-soft: rgba(251,191,36,.12);
+      --link: #fbbf24;
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --info: #93c5fd;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #09090b;
+    --surface: #131316;
+    --surface-2: #1c1c21;
+    --text: #f4f4f5;
+    --muted: #a1a1aa;
+    --border: #27272a;
+    --accent-soft: rgba(251,191,36,.12);
+    --link: #fbbf24;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --info: #93c5fd;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  a { color: var(--link); }
+  code, pre { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .875rem; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  header.top { border-bottom: 1px solid var(--border); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); text-decoration: none; }
+  .logo { width: 30px; height: 30px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; flex: none; }
+  .logo svg { width: 18px; height: 18px; }
+  nav.links { display: flex; gap: 20px; align-items: center; }
+  nav.links a { color: var(--muted); text-decoration: none; font-size: .9375rem; }
+  nav.links a:hover { color: var(--text); }
+  @media (max-width: 640px) { nav.links a.hide-sm { display: none; } }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: .9375rem;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer;
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-primary:hover { filter: brightness(1.05); }
+  .btn-primary[aria-disabled="true"] { opacity: .6; cursor: default; filter: none; }
+  .btn-ghost { border-color: var(--border); color: var(--text); background: var(--surface); }
+  .btn-ghost:hover { border-color: var(--muted); }
+  .btn-sm { padding: 8px 14px; font-size: .875rem; }
+
+  .hero { padding: 72px 0 48px; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+  @media (max-width: 880px) { .hero-grid { grid-template-columns: 1fr; } .hero { padding-top: 48px; } }
+  .eyebrow {
+    display: inline-block; font-size: .8125rem; font-weight: 600; color: var(--link);
+    background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; margin-bottom: 18px;
+  }
+  h1 { font-size: clamp(2.1rem, 5vw, 3.25rem); line-height: 1.1; letter-spacing: -.025em; margin: 0 0 18px; font-weight: 800; }
+  .lead { font-size: 1.125rem; color: var(--muted); margin: 0 0 28px; max-width: 34em; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .meta { margin-top: 18px; color: var(--muted); font-size: .875rem; }
+
+  /* Illustrative mock of the tickets page */
+  .mock { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
+  .mock-bar { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  .mock-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--border); display: block; }
+  .mock-body { padding: 18px; }
+  .mock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+  .mock-head strong { font-size: 1.05rem; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .chip { font-size: .75rem; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--border); }
+  .row .t { font-weight: 600; font-size: .9375rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .s { font-size: .8125rem; color: var(--muted); }
+  .badges { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+  .badge { font-size: .6875rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .03em; }
+  .b-open { color: var(--info); background: color-mix(in srgb, var(--info) 12%, transparent); }
+  .b-pending { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+  .b-resolved { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+  .b-high { color: #dc2626; background: rgba(220,38,38,.12); }
+  .mock-caption { font-size: .75rem; color: var(--muted); text-align: center; margin-top: 10px; }
+
+  section { padding: 64px 0; }
+  section.alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  h2 { font-size: clamp(1.6rem, 3.5vw, 2.1rem); letter-spacing: -.02em; line-height: 1.2; margin: 0 0 12px; }
+  .section-lead { color: var(--muted); margin: 0 0 36px; max-width: 40em; font-size: 1.0625rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 880px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+  section:not(.alt) .card { background: var(--surface); }
+  .card h3 { margin: 12px 0 6px; font-size: 1.0625rem; }
+  .card p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  .icon { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-soft); display: grid; place-items: center; color: var(--link); }
+  .icon svg { width: 20px; height: 20px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+  @media (max-width: 880px) { .split { grid-template-columns: 1fr; gap: 28px; } }
+  ul.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  ul.checks li { padding-left: 30px; position: relative; color: var(--muted); }
+  ul.checks li strong { color: var(--text); font-weight: 600; }
+  ul.checks li::before {
+    content: ""; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3 3 7-7' fill='none' stroke='%23d97706' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat;
+  }
+
+  .steps { counter-reset: s; display: grid; gap: 16px; }
+  .step { counter-increment: s; display: grid; grid-template-columns: 36px 1fr; gap: 14px; }
+  .step::before {
+    content: counter(s); width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; font-weight: 700; font-size: .9375rem;
+  }
+  .hero-grid > *, .split > *, .step > * { min-width: 0; }
+  .step h3 { margin: 4px 0 4px; font-size: 1rem; }
+  .step p { margin: 0; color: var(--muted); font-size: .9375rem; }
+  pre { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 0; color: var(--text); }
+  :not(pre) > code { background: var(--surface-2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 5px; font-size: .8125rem; }
+
+  .pricing { max-width: 520px; margin: 0 auto; text-align: center; background: var(--surface); border: 2px solid var(--accent); border-radius: 18px; padding: 36px 28px; box-shadow: var(--shadow); }
+  .price { font-size: 2.5rem; font-weight: 800; letter-spacing: -.02em; margin: 6px 0; }
+  .price-note { color: var(--muted); margin: 0 0 22px; }
+  .pricing ul.checks { text-align: left; margin: 0 0 26px; }
+  .pricing .btn { width: 100%; }
+
+  .faq { max-width: 760px; }
+  details { border-bottom: 1px solid var(--border); padding: 16px 0; }
+  details summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--muted); font-weight: 400; font-size: 1.25rem; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  details p { color: var(--muted); margin: 10px 0 0; }
+
+  footer { padding: 36px 0 48px; color: var(--muted); font-size: .875rem; border-top: 1px solid var(--border); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .theme-toggle { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: .8125rem; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#09090b" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6M14.8 14.8l3.6 3.6M18.4 5.6l-3.6 3.6M9.2 14.8l-3.6 3.6"/></svg>
+      </span>
+      Support for Flarum
+    </a>
+    <nav class="links">
+      <a href="#features" class="hide-sm">Features</a>
+      <a href="#install" class="hide-sm">Install</a>
+      <a href="#faq" class="hide-sm">FAQ</a>
+      <a class="btn btn-primary btn-sm js-buy" href="#pricing">Buy</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Flarum 2.x extension</span>
+        <h1>A helpdesk inside your Flarum forum.</h1>
+        <p class="lead">A knowledge base and private support tickets, built on Flarum's own discussions, tags, permissions and notifications. Your members get help where they already are, and visitors without an account can reach you too.</p>
+        <div class="cta">
+          <a class="btn btn-primary js-buy" href="#pricing">Get the extension</a>
+          <a class="btn btn-ghost" href="#features">See features</a>
+        </div>
+        <p class="meta">Requires Flarum 2.x, PHP 8.3+, MySQL or MariaDB, and <code>flarum/tags</code>.</p>
+      </div>
+
+      <div>
+        <div class="mock" role="img" aria-label="Illustration of the tickets page: a list of tickets with status and priority labels">
+          <div class="mock-bar"><i></i><i></i><i></i></div>
+          <div class="mock-body">
+            <div class="mock-head"><strong>All tickets</strong><span class="btn btn-primary btn-sm" aria-hidden="true">New ticket</span></div>
+            <div class="chips"><span class="chip">Open &amp; pending</span><span class="chip">Any priority</span><span class="chip">Assigned to me</span></div>
+            <div class="row"><span class="t">Can't log in after password reset</span><span class="badges"><span class="badge b-high">High</span><span class="badge b-open">Open</span></span><span class="s">#142 · Guest · 4 min ago</span></div>
+            <div class="row"><span class="t">Refund for a duplicate purchase</span><span class="badges"><span class="badge b-pending">Pending</span></span><span class="s">#139 · Assigned to Mia, Jon</span></div>
+            <div class="row"><span class="t">Avatar upload fails on mobile</span><span class="badges"><span class="badge b-open">Open</span></span><span class="s">#137 · Unassigned</span></div>
+            <div class="row"><span class="t">How do I change my username?</span><span class="badges"><span class="badge b-resolved">Resolved</span></span><span class="s">#131 · Assigned to Mia</span></div>
+          </div>
+        </div>
+        <p class="mock-caption">Illustration</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="alt" id="features">
+    <div class="wrap">
+      <h2>Everything a small support team needs</h2>
+      <p class="section-lead">No separate helpdesk app, no second login. Tickets and articles are Flarum discussions, so search, mentions, formatting and moderation all work as usual.</p>
+      <div class="grid">
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div>
+          <h3>Knowledge base</h3>
+          <p>Pick the tags that hold your articles. Members get a searchable knowledge base page with categories, and articles can be kept out of All Discussions.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <h3>Private tickets</h3>
+          <p>Only the person who opened a ticket and your support staff can see it. Tickets never show up in discussion lists or tag pages.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <h3>Status &amp; priority</h3>
+          <p>Open, pending, resolved and closed, with low, normal and high priority. Every change is recorded in the ticket's timeline.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Multiple assignees</h3>
+          <p>Assign one or several staff members. Filter the ticket list by status, priority, "assigned to me" or unassigned.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <h3>Notifications &amp; email</h3>
+          <p>New tickets, staff replies, customer replies and status changes, in the forum and by email. Each user picks what they receive.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3>Permissions</h3>
+          <p>Separate permissions for viewing the knowledge base, opening tickets and managing tickets, set per group in Flarum's admin panel.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="guests">
+    <div class="wrap split">
+      <div>
+        <h2>Tickets from visitors without an account</h2>
+        <p class="section-lead">People who can't log in are often the ones who need help most. Turn on guest tickets and visitors get a contact form on <code>/tickets</code>.</p>
+      </div>
+      <ul class="checks">
+        <li><strong>Email confirmation.</strong> A request becomes a ticket only after the visitor opens the link emailed to them. Unconfirmed requests are deleted after 7 days.</li>
+        <li><strong>Secret links, no passwords.</strong> Guests read and answer their ticket through a link in each email. The token stays in the URL fragment and only its hash is stored.</li>
+        <li><strong>Spam protection.</strong> Rate limits per IP and per email address, plus a honeypot field.</li>
+        <li><strong>Privacy built in.</strong> Staff see the guest's name and email; deleting the ticket deletes them too.</li>
+        <li><strong>Off by default.</strong> Enable it with one switch in the extension settings.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="alt" id="pricing">
+    <div class="wrap">
+      <div class="pricing">
+        <span class="eyebrow">License</span>
+        <div class="price" id="price">Coming soon</div>
+        <p class="price-note" id="price-note"></p>
+        <ul class="checks">
+          <li>Use on your own Flarum forum</li>
+          <li>Full source code, which you may modify for your forum</li>
+          <li>Updates and new Flarum compatibility while your license is active</li>
+          <li>Support from the developer</li>
+        </ul>
+        <a class="btn btn-primary js-buy" href="#pricing">Buy now</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap split">
+      <div>
+        <h2>How installing works</h2>
+        <p class="section-lead">Your purchase gives your GitHub account read access to the private repository. Composer installs it from there like any other extension.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div>
+            <h3>Buy and connect GitHub</h3>
+            <p>After checkout, connect your GitHub account on the purchase page. You'll get an invitation to the private repository; accept it.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>Give Composer access</h3>
+            <p>Create a <a href="https://github.com/settings/tokens/new?scopes=repo&amp;description=Composer">classic GitHub token</a> with the <code>repo</code> scope, then on your server:</p>
+<pre>composer config repositories.flarum-support vcs https://github.com/Soup-97/pixmmo-flarum-support-system
+composer config github-oauth.github.com YOUR_TOKEN</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h3>Install</h3>
+<pre>composer require soup-97/flarum-support
+php flarum migrate
+php flarum cache:clear</pre>
+            <p style="margin-top:10px">Then enable <strong>Support</strong> in your admin panel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="faq">
+    <div class="wrap faq">
+      <h2>Questions</h2>
+      <details>
+        <summary>Which Flarum versions are supported?</summary>
+        <p>Flarum 2.x. The extension needs PHP 8.3 or newer, MySQL or MariaDB, and the bundled Tags extension.</p>
+      </details>
+      <details>
+        <summary>Do I need a GitHub account?</summary>
+        <p>Yes. Access to the code and updates goes through GitHub, so you need a (free) GitHub account to buy and install.</p>
+      </details>
+      <details>
+        <summary>What happens when my license ends?</summary>
+        <p>You can keep using the last version you received. You won't get new versions or support until you renew.</p>
+      </details>
+      <details>
+        <summary>Can I change the code?</summary>
+        <p>Yes, for use on your own forum. You may not redistribute or resell it. The translation files are MIT-licensed, so you can share translations freely.</p>
+      </details>
+      <details>
+        <summary>How do I get support?</summary>
+        <p>Once you have access, open an issue in the private repository. Before buying, ask in the extension's thread on <a href="https://discuss.flarum.org">discuss.flarum.org</a>.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Support for Flarum by <a href="https://github.com/Soup-97">Soup-97</a>. Not affiliated with the Flarum Foundation.</span>
+    <button class="theme-toggle" id="theme-toggle" type="button">Toggle theme</button>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var s = window.SITE || {};
+    var hasCheckout = !!s.CHECKOUT_URL;
+
+    document.getElementById('price').textContent = s.PRICE || 'Coming soon';
+    document.getElementById('price-note').textContent = s.PRICE ? s.PRICE_NOTE : 'Sales open shortly.';
+
+    document.querySelectorAll('.js-buy').forEach(function (el) {
+      if (hasCheckout) {
+        el.href = s.CHECKOUT_URL;
+      } else if (el.closest('.pricing')) {
+        el.textContent = 'Coming soon';
+        el.setAttribute('aria-disabled', 'true');
+        el.removeAttribute('href');
+      }
+    });
+
+    var root = document.documentElement;
+    try {
+      var saved = localStorage.getItem('theme');
+      if (saved) root.setAttribute('data-theme', saved);
+    } catch (e) {}
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+      var current = root.getAttribute('data-theme') ||
+        (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var next = current === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>
